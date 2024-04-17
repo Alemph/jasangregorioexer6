@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-// connects to mongodb
+// Connect to MongoDB using a given URI.
 async function connectDB() {
     try {
         await mongoose.connect("mongodb+srv://jlsangregorio:xvpJ6EPxw32IOjgd@cluster0.na6nkrh.mongodb.net/StudentDatabase");
@@ -12,15 +12,15 @@ async function connectDB() {
 
 connectDB();
 
-const Student = mongoose.model('Student',
-    {
-        stdnum : Number,
-        fname: String,
-        lname: String,
-        age: Number
-    });
+// Define a Mongoose model for students.
+const Student = mongoose.model('Student', {
+    stdnum : Number,
+    fname: String,
+    lname: String,
+    age: Number
+});
 
-// saves a new student's details
+// Insert a new student into the database.
 const saveStudent = async (req, res) => {
     try {
         const { stdnum, fname, lname, age } = req.body;
@@ -31,10 +31,9 @@ const saveStudent = async (req, res) => {
     }
 }
 
-// updates a student's details
+// Update details for an existing student.
 const updateStudent = async (req, res) => {
     try {
-        // updates "Mary Jane"s last name to "Parker"
         await Student.updateOne({ fname: "Mary Jane" }, { $set: { lname: "Parker" } });
         res.send({ updated: true });
     } catch (error) {
@@ -42,27 +41,27 @@ const updateStudent = async (req, res) => {
     }
 }
 
-// removes a student's details
+// Remove a specific student from the database by student number.
 const removeUser = async (req, res) => {
     try {
         await Student.deleteOne({ stdnum: req.body.stdnum });
         res.send({ removed: true });
     } catch (error) {
-        res.send({ removed: fddalse });
+        res.send({ removed: false }); // Corrected typo from 'fddalse' to 'false'.
     }
 }
 
-// removes all student's details
+// Remove all student entries from the database.
 const removeAllUsers = async (req, res) => {
     try {
-        const result = await Student.deleteMany();
+        await Student.deleteMany();
         res.send({ deleted: true });
     } catch (error) {
         res.send({ deleted: false });
     }
 }
 
-// finds a student's details using their student number
+// Retrieve details of a student by student number.
 const findUserByUsername = async (req, res) => {
     try {
         const user = await Student.find({ stdnum: req.query.stdnum });
@@ -72,7 +71,7 @@ const findUserByUsername = async (req, res) => {
     }
 }
 
-// gets all students' details
+// Retrieve details of all students in the database.
 const getAllMembers = async (req, res) => {
     try {
         const members = await Student.find();
@@ -82,4 +81,5 @@ const getAllMembers = async (req, res) => {
     }
 }
 
+// Export the functions to make them available for import in other files.
 export { saveStudent, updateStudent, removeUser, removeAllUsers, findUserByUsername, getAllMembers };

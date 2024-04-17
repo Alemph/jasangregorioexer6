@@ -2,10 +2,10 @@ import needle from 'needle';
 
 const baseURL = 'http://localhost:3000';
 
-// saves "Mary Jane Watson" as a new student
+// Add a new student, "Mary Jane Watson", to the database.
 const testSaveStudent = async () => {
     const payload = {
-        stdnum: 123456789,
+        stdnum: 8051495845,
         fname: 'Mary Jane',
         lname: 'Watson',
         age: 20
@@ -14,43 +14,44 @@ const testSaveStudent = async () => {
     console.log('Save Student:', response.body);
 };
 
-// updates "Mary Jane"s last name to "Parker"
+// Update the last name of "Mary Jane" to "Parker".
 const testUpdate = async () => {
     const response = await needle('post', `${baseURL}/update`, null, { json: true });
     console.log('Update:', response.body);
 };
 
-// removes student with "123456789" as their student number
+// Remove the student record with student number.
 const testRemoveUser = async () => {
     const payload = {
-        stdnum: 123456789
+        stdnum: 8051495845
     };
     const response = await needle('post', `${baseURL}/remove-user`, payload, { json: true });
     console.log('Remove User:', response.body);
 };
 
-// removes all students' details
+// Remove all students' details from the database.
 const testRemoveAllUsers = async () => {
     const response = await needle('post', `${baseURL}/remove-all-user`, null, { json: true });
     console.log('Remove All Users:', response.body);
 };
 
-// gets student's details with "123456789" as their student number
+// Retrieve details for the student with student number.
 const testUser = async () => {
-    const stdnum = '123456789';
+    const stdnum = '8051495845';
     const response = await needle('get', `${baseURL}/user?stdnum=${stdnum}`);
     console.log('User:', response.body);
 };
 
-// gets all students' details
+// Retrieve details for all students.
 const testMembers = async () => {
     const response = await needle('get', `${baseURL}/members`);
     console.log('Members:', response.body);
 };
 
+// Uncomment the following lines to execute the corresponding functions:
 testSaveStudent();
 testUpdate();
 // testRemoveUser();
-testRemoveAllUsers();
+// testRemoveAllUsers();
 testUser();
 testMembers();
