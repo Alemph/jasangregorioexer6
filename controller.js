@@ -1,85 +1,110 @@
 import mongoose from 'mongoose';
 
-// Connect to MongoDB using a given URI.
-async function connectDB() {
-    try {
-        await mongoose.connect("mongodb+srv://jlsangregorio:xvpJ6EPxw32IOjgd@cluster0.na6nkrh.mongodb.net/StudentDatabase");
-        console.log("Connected to MongoDB");
-    } catch (error) {
-        console.error("Error connecting to MongoDB: ", error);
-    }
-}
+// Connection string
+await mongoose.connect("mongodb+srv://jlsangregorio:xvpJ6EPxw32IOjgd@cluster0.na6nkrh.mongodb.net/StudentDatabase");
 
-connectDB();
-
-// Define a Mongoose model for students.
-const Student = mongoose.model('Student', {
-    stdnum : Number,
+console.log("Connected to MongoDB")
+// Subject model
+const Student = mongoose.model('students', {
+    stdnum: Number,
     fname: String,
     lname: String,
     age: Number
 });
 
-// Insert a new student into the database.
+// Function to save a new student
 const saveStudent = async (req, res) => {
-    try {
-        const { stdnum, fname, lname, age } = req.body;
-        await Student.create({ stdnum, fname, lname, age });
-        res.send({ inserted: true });
-    } catch (error) {
-        res.send({ inserted: false });
-    }
-}
+    if (req.body.stdnum && req.body.fname && req.body.lname && req.body.age) {
+        const newStudent = new Student(req.body);
 
-// Update details for an existing student.
+        await newStudent.save();
+
+        return res.status(200).json({ inserted: true });
+    } else {
+        return res.status(400).json({ error: "INVALID" });
+    }
+};
+
+// Function to update the last name of a student
 const updateStudent = async (req, res) => {
     try {
-        await Student.updateOne({ fname: "Mary Jane" }, { $set: { lname: "Parker" } });
-        res.send({ updated: true });
-    } catch (error) {
-        res.send({ updated: false });
-    }
-}
+        const fname = req.body.fname;
 
-// Remove a specific student from the database by student number.
-const removeUser = async (req, res) => {
+        if (!fname) {
+            return res.status(400).json({ error: "INVALID" });
+        }
+
+        const updatedStudent = await Student.updateOne({ fname: fname }, { $set: { lname: "Parker" } });
+
+        if (updatedStudent.nModified > 0) {
+            return res.status(200).json({ updated: true });
+        } else {
+            return res.status(404).json({ updated: false });
+        }
+    } catch (error) {
+        console.error("ERROR:", error);
+        return res.status(500).send("SERVER ERROR");
+    }
+};
+
+// Function to delete a student
+const deleteStudent = async (req, res) => {
     try {
-        await Student.deleteOne({ stdnum: req.body.stdnum });
-        res.send({ removed: true });
-    } catch (error) {
-        res.send({ removed: false }); // Corrected typo from 'fddalse' to 'false'.
-    }
-}
+        const stdnum = req.body.stdnum;
 
-// Remove all student entries from the database.
-const removeAllUsers = async (req, res) => {
+        if (!stdnum) {
+            return res.status(400).json({ error: "INVALID" });
+        }
+
+        await Student.deleteOne({ stdnum: stdnum });
+
+        return res.status(200).json({ deleted: true });
+    } catch (error) {
+        console.error("ERROR:", error);
+        return res.status(500).send("SERVER ERROR");
+    }
+};
+
+// Function to delete all students
+const deleteAllStudents = async (req, res) => {
     try {
-        await Student.deleteMany();
-        res.send({ deleted: true });
-    } catch (error) {
-        res.send({ deleted: false });
-    }
-}
+        const deleteAllStudents = await Student.deleteMany({});
 
-// Retrieve details of a student by student number.
-const findUserByUsername = async (req, res) => {
+        return res.status(200).json({ deleted: true, deleteCount: deleteAllStudents.deletedCount });
+    } catch (error) {
+        console.error("ERROR:", error);
+        return res.status(500).send("SERVER ERROR");
+    }
+};
+
+// Function to get a student by student number
+const getStudent = async (req, res) => {
     try {
-        const user = await Student.find({ stdnum: req.query.stdnum });
-        res.send(user);
-    } catch (error) {
-        res.send([]);
-    }
-}
+        const stdnum = req.query.stdnum;
 
-// Retrieve details of all students in the database.
-const getAllMembers = async (req, res) => {
+        if (!stdnum) {
+            return res.status(400).json({ error: "INVALID" });
+        }
+
+        const getStudent = await Student.find({ stdnum: stdnum });
+
+        return res.status(200).json(getStudent || []);
+    } catch (error) {
+        console.error("ERROR:", error);
+        return res.status(500).send("SERVER ERROR");
+    }
+};
+
+// Function to get all students
+const getAllStudents = async (req, res) => {
     try {
-        const members = await Student.find();
-        res.send(members);
-    } catch (error) {
-        res.send([]);
-    }
-}
+        const getStudents = await Student.find({});
 
-// Export the functions to make them available for import in other files.
-export { saveStudent, updateStudent, removeUser, removeAllUsers, findUserByUsername, getAllMembers };
+        return res.status(200).json(getStudents || []);
+    } catch (error) {
+        console.error("ERROR:", error);
+        return res.status(500).send("SERVER ERROR");
+    }
+};
+
+export { saveStudent, updateStudent, deleteStudent, deleteAllStudents, getStudent, getAllStudents };
